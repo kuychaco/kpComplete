@@ -76,14 +76,17 @@ var parallelNets = function(allParamComboArr) {
   console.log('trainingObj',allParamComboArr[0].trainingObj);
 
 
-  var parallelFunc = function(netPArams){
-    console.log('it works now');
-    var path = require('path');
-    var fs = require('fs');
+  function parallelFunc(netParams){
+    console.log('it works at this point');
+    // as soon as we get to require, it breaks. 
+    console.log('path is:');
     console.log(path);
+    // var path = require('path');
+    // var fs = require('fs');
+    // console.log(path);
     // TODO: navigate to brain.js inside of our own node module. once we turn this into a module, of course. 
-    var brain = require(path.join(__dirname + '../../../brain/lib/brain.js'));
-    var byline = require(path.join(__dirname + '../../../byline/lib/byline.js'));
+    // var brain = require(path.join(__dirname + '../../../brain/lib/brain.js'));
+    // var byline = require(path.join(__dirname + '../../../byline/lib/byline.js'));
     // var Promise = require(path.join(__dirname + '../../../bluebird/js/main/bluebird.js'));
     console.log('inside a callback in our map threads');
     console.log('__dirname:',__dirname);
@@ -185,6 +188,7 @@ var parallelNets = function(allParamComboArr) {
 
   var thread = Threads.create();
   thread.eval(parallelFunc);
+  thread.eval(path); //this does not appear to be at all effective
   thread.eval('parallelFunc()')
 
   thread.onmessage = function(event) {
@@ -248,76 +252,6 @@ var multipleNetAlgo = function() {
     allParamComboArr.push({hiddenLayers: hlArray, trainingObj: trainingObj, pathToData: currentPath});
   }
   console.log('allParamComboArr:',allParamComboArr);
-
-  // // //copying here to test if it's parallelization issues or brain issues:
-  // var net = new brain.NeuralNetwork({
-  //   errorThresh: 0.05,  // error threshold to reach
-  //   iterations: 100,    // maximum training iterations
-  //   log: true,          // console.log() progress periodically
-  //   logPeriod: 1,       // number of iterations between logging
-  //   learningRate: 0.6   // learning rate
-  // }); 
-
-  // var trainStream = net.createTrainStream({
-  //   errorThresh: 0.05,  // error threshold to reach
-  //   iterations: 100,    // maximum training iterations
-  //   log: true,          // console.log() progress periodically
-  //   logPeriod: 1,       // number of iterations between logging
-  //   learningRate: 0.6,   // learning rate
-  //   /**
-  //    * Write training data to the stream. Called on each training iteration.
-  //    */
-  //   floodCallback: function() {
-  //     console.log('inside flood callback');
-  //     var currentPath = path.join(__dirname, '../inputData.txt');
-  //     var newStream = fs.createReadStream(currentPath);
-  //     newStream = byline(newStream);
-  //     var numOfItems = 0;
-  //     newStream.on('data', function(data) {
-  //       trainStream.write(JSON.parse(data));
-  //       numOfItems++;
-  //     });
-  //     // newStream.pipe(trainStream, {end: false});
-  //     newStream.on('end', function() {
-  //       // console.log('heard an end!');
-  //       // setTimeout(function() {
-  //       //   console.log('writing null to trainStream after 3 seconds');
-  //         trainStream.write(null);  
-  //         console.log('numOfItems',numOfItems);
-  //       // }, 3000);
-  //     });
-  //     // console.log('end of floodCallback (synchronously)');
-  //   },
-
-  //   /**
-  //    * Called when the network is done training.
-  //    */
-  //   doneTrainingCallback: function(obj) {
-  //     console.log("trained in " + obj.iterations + " iterations with error: "
-  //                 + obj.error);
-  //   }
-  // });
-
-  // var currentPath = path.join(__dirname, '../inputData.txt');
-  // var readStream = fs.createReadStream(currentPath, {encoding:'utf8'});
-  // readStream = byline(readStream);
-  // var numOfItems = 0;
-  // readStream.on('data', function(data) {
-  //   // console.log('one line of data in readStream is:',JSON.parse(data));
-  //   trainStream.write(JSON.parse(data));
-  //   numOfItems++;
-  // });
-  // // readStream.pipe(trainStream, {end: false});
-  // readStream.on('end', function() {
-  //   // console.log('ended reading the stream');
-  //   // setTimeout(function() {
-  //   //   console.log('writing null to trainStream after a 3 second delay');
-  //   console.log('numOfItems',numOfItems);
-  //     trainStream.write(null);
-  //   // },3000);
-  // });
-  // console.log('happening asynch after createReadStream');
-
 
   parallelNets(allParamComboArr);
 };
